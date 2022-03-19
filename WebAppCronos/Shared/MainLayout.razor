@@ -1,0 +1,62 @@
+﻿@using Radzen.Blazor
+@inherits LayoutComponentBase
+
+@inject IHttpContextAccessor httpContextAccessor
+
+<RadzenLayout>
+    <RadzenHeader>
+        <ChildContent>
+            <div class="row justify-content-start align-items-center">
+                <div class="col-5 d-flex align-items-center">
+                    <RadzenSidebarToggle Click="@(args => { sidebarExpanded = !sidebarExpanded; bodyExpanded = !bodyExpanded; })">
+                    </RadzenSidebarToggle>
+                    <RadzenLabel Text="Cronos"></RadzenLabel>
+                </div>
+            </div>
+        </ChildContent>
+    </RadzenHeader>
+    <RadzenBody @ref="@body0" @bind-Expanded="@bodyExpanded">
+        <ChildContent>
+            <RadzenContentContainer Name="main">
+                <div class="container-fluid">
+                    @Body
+                </div>
+            </RadzenContentContainer>
+        </ChildContent>
+    </RadzenBody>
+    <RadzenSidebar @ref="@sidebar0" @bind-Expanded="@sidebarExpanded">
+        <ChildContent>
+            <div class="rz-sidebar">
+                <NavMenu />
+            </div>
+        </ChildContent>
+    </RadzenSidebar>
+
+    <RadzenDialog/>
+</RadzenLayout>
+
+@code {
+    RadzenSidebar sidebar0 = new RadzenSidebar();
+    RadzenBody body0 = new RadzenBody();
+    bool sidebarExpanded = true;
+    bool bodyExpanded = false;
+
+    protected override void OnInitialized()
+    {
+        if (httpContextAccessor != null && httpContextAccessor.HttpContext != null &&
+             httpContextAccessor.HttpContext.Request != null && httpContextAccessor.HttpContext.Request.Headers.ContainsKey("User-Agent"))
+        {
+            var userAgent = httpContextAccessor.HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(userAgent))
+            {
+                if (userAgent.Contains("iPhone") || userAgent.Contains("Android") || userAgent.Contains("Googlebot"))
+                {
+                    sidebarExpanded = false;
+                    bodyExpanded = true;
+                }
+            }
+        }
+    }
+}
+
+

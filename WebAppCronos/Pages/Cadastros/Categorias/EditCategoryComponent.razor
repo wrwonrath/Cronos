@@ -1,0 +1,91 @@
+﻿@page "/editcategory/{categoryId}"
+@using UseCases
+@using Radzen
+@using Radzen.Blazor
+
+@inject NavigationManager NavigationManager
+@inject IEditCategoryUseCase EditCategoryUseCase
+@inject IGetCategoryByIdUseCase GetCategoryUseCase
+
+<style>
+    form .row {
+        margin-bottom: 16px;
+    }
+</style>
+
+<h3>Editar Categoria</h3>
+
+@if (category == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <RadzenTemplateForm Data="@category" Submit="@((Category args) => { OnValidSubmit(args); })">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenCard>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Nome" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox style="width: 100%;" Name="Name" @bind-Value="category.Name" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Descrição" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox style="width: 100%;" Name="Description" @bind-Value="category.Description" />
+                        </div>
+                    </div>                   
+                </RadzenCard>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Salvar" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="Cancelar" Click="@OnCancel" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}
+
+@code {
+    [Parameter]
+    public string CategoryId { get; set; } = String.Empty;
+
+    private Category category = new Category();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        category = new Category();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (int.TryParse(this.CategoryId, out int iCategoryId))
+        {
+            this.category = this.GetCategoryUseCase.Execute(iCategoryId);
+        }        
+    }
+
+    private void OnValidSubmit(Category category)
+    {
+        EditCategoryUseCase.Execute(category);
+        NavigationManager.NavigateTo("/categories");
+    }
+
+    private void OnCancel()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+}

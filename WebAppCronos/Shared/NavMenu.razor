@@ -1,0 +1,17 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+<RadzenPanelMenu>
+    <ul class="rz-panel-menu">
+        <li class="rz-navigation-item">
+            <RadzenPanelMenuItem Text="General" Path="/" Icon="home" />
+        </li>
+
+        <li class="rz-navigation-item">
+            <RadzenPanelMenuItem Text="Cadastros" Icon="source">
+                <RadzenPanelMenuItem Text="Categorias" Path="Categories" Icon="category"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="Produtos" Path="Products" Icon="production_quantity_limits"></RadzenPanelMenuItem>
+            </RadzenPanelMenuItem>
+        </li>
+    </ul>
+</RadzenPanelMenu>

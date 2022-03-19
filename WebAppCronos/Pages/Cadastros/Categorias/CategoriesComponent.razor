@@ -1,0 +1,112 @@
+﻿@page "/categories"
+@using UseCases
+@using Radzen
+@using Radzen.Blazor
+
+@inject NavigationManager NavigationManager
+@inject UseCases.IViewCategoriesUseCase ViewCategoryUseCase
+@inject UseCases.IDeleteCategoryUseCase DeleteCategoryUseCase
+@*@inject Controllers.UserController userController;*@
+@inject DialogService DialogService
+
+<PageTitle>Categorias Dealer</PageTitle>
+
+<h1>Categorias Dealer</h1>
+
+<p>Cadastro de categorias</p>
+
+@if (categories == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <div class="container">
+        <div class="row py-2">
+            <div class="col">
+                <RadzenCard>
+
+                    <RadzenDataList WrapItems="true" AllowPaging="true" Data="@categories" TItem="Category" PageSize="5">
+                        <Template Context="category">
+                            <RadzenCard Style="width: 100%; padding: 0; overflow: hidden;">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-lg-3 p-3 product-title">
+                                            @(category.Name)
+                                        </div>
+                                        <div class="col-lg-7 p-3">
+                                            <div class="row d-flex">
+                                                <div class="col-md-6 col-lg-2">
+                                                    <h5 class="mb-0">Descrição</h5>
+                                                    <p class="mb-sm-2 mb-lg-0">@(category.Description)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 p-3">
+                                            <RadzenButton Click=@(args => EditCategory(category)) Icon="edit_circle_outline" ButtonStyle="ButtonStyle.Secondary" />
+                                            <RadzenButton Click=@(args => DeleteDialog(category)) Icon="delete_circle_outline" ButtonStyle="ButtonStyle.Danger" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </RadzenCard>
+                        </Template>
+                    </RadzenDataList>
+
+                </RadzenCard>
+            </div>
+        </div>
+    </div>
+}
+<br />
+<RadzenButton Click=@(args => OnClickAddCategory()) Text="Adicionar Categoria" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />
+
+@code {
+    private Category[]? categories;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        categories = ViewCategoryUseCase.Execute()?.ToArray();
+    }
+
+    private void OnClickAddCategory()
+    {
+        NavigationManager.NavigateTo("/addcategory");
+    }
+
+    private void EditCategory(Category category)
+    {
+        NavigationManager.NavigateTo($"/editcategory/{category.CategoryId}");
+    }
+
+    async Task DeleteDialog(Category category)
+    {
+        var result = await DialogService.OpenAsync("Excluir", ds =>
+            @<div>
+                <p Style="margin-bottom: 1rem">Deseja realmente excluir a categoria: @category.Name?</p>
+                <div class="row">
+                    <div class="col-md-12">
+                        <RadzenButton Text="Sim" Click="() => ds.Close(true)" Style="margin-bottom: 10px; width: 150px" />
+                        <RadzenButton Text="Não" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+                    </div>
+                </div>
+            </div>);
+
+        if (result != null && result)
+        {
+            DeleteCategory(category.CategoryId);
+        }
+    }
+
+    private void DeleteCategory(int categoryId)
+    {
+        DeleteCategoryUseCase.Delete(categoryId);
+        LoadCategories();
+    }
+
+    private void LoadCategories()
+    {
+        categories = ViewCategoryUseCase.Execute()?.ToArray();
+    }
+}

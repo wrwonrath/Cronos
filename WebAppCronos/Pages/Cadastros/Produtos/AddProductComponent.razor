@@ -1,0 +1,105 @@
+﻿@page "/addproduct"
+@using UseCases
+@using Radzen
+@using Radzen.Blazor
+
+@inject NavigationManager NavigationManager
+@inject IAddProductUseCase AddProductUseCase
+@inject IViewCategoriesUseCase ViewCategoriesUseCase
+
+<style>
+    form .row {
+        margin-bottom: 16px;
+    }
+</style>
+
+<h3>Adicionar Produto</h3>
+
+@if (product == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <RadzenTemplateForm Data="@product" Submit="@((Product args) => { OnValidSubmit(args); })">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenCard>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Nome" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox style="width: 100%;" Name="Name" @bind-Value="product.Name" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Descrição" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox style="width: 100%;" Name="Description" @bind-Value="product.Description" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Categoria" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenDropDown @bind-Value="product.CategoryId" Data="@categories" style="width: 100%;" TextProperty="Name" ValueProperty="CategoryId" Name="Category">
+                            </RadzenDropDown>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Quantidade" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenNumeric TValue="int" style="width: 100%;" Name="Quantity" @bind-Value="product.Quantity" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Preço" />
+                        </div>
+                        <div class="col-md-3">
+                            <RadzenNumeric TValue="double" Format="c" style="width: 100%;" Name="Price" @bind-Value="product.Price" />
+                        </div>
+                    </div>
+                </RadzenCard>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Salvar" />
+                <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="Cancelar" Click="@OnCancel" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+}
+
+@code {
+    private Product product = new Product();
+    private IEnumerable<Category> categories = new List<Category>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        product = new Product();
+        categories = ViewCategoriesUseCase.Execute();
+    }
+
+    private void OnValidSubmit(Product product)
+    {
+        AddProductUseCase.Execute(product);
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private void OnCancel()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+}
